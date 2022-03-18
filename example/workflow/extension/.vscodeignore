@@ -1,0 +1,9 @@
+# Ignore everything
+*
+*/
+
+# Whitelist what you need
+!pack/*
+!server/*.jar
+!LICENSE
+!package.json

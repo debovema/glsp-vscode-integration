@@ -25,7 +25,8 @@
     "Programming Languages"
   ],
   "engines": {
-    "vscode": "^1.54.0"
+    "vscode": "^1.54.0",
+    "node": ">=14.x"
   },
   "contributes": {
     "customEditors": [
@@ -167,20 +168,17 @@
     ]
   },
   "activationEvents": [
-    "*"
+    "workspaceContains:**/**.wf"
   ],
   "files": [
-    "lib",
-    "extension",
-    "server",
-    "webview"
+    "pack",
+    "server"
   ],
-  "dependencies": {
-    "@vscode/codicons": "^0.0.25"
-  },
-  "main": "./lib/index",
+  "main": "./pack/extension.js",
   "devDependencies": {
+    "@vscode/codicons": "^0.0.25",
     "@eclipse-glsp/vscode-integration": "0.9.0",
+    "workflow-glsp-webview": "0.9.0",
     "@types/vscode": "^1.54.0",
     "path": "^0.12.7",
     "reflect-metadata": "^0.1.13",
@@ -188,15 +186,17 @@
     "ts-loader": "^6.2.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.4.3",
-    "workflow-glsp-webview": "0.9.0"
+    "vsce": "2.7.0"
   },
   "scripts": {
-    "prepare": "yarn clean && yarn build && yarn lint",
+    "prepare": "yarn clean && yarn build && yarn lint && yarn webpack",
     "clean": "rimraf extension/lib extension/pack extension/server",
     "watch": "tsc -w",
     "lint": "eslint -c ./.eslintrc.js --ext .ts ./src",
     "build": "tsc  && yarn download:Server",
     "publish": "vsce publish",
+    "package": "vsce package --yarn",
+    "webpack": "webpack --mode development",
     "download:Server": "ts-node ../scripts/download.ts"
   },
   "workspaces": {
