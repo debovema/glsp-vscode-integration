@@ -31,15 +31,14 @@
     "src"
   ],
   "engines": {
-    "vscode": "^1.54.0"
+    "vscode": "^1.63.0"
   },
   "dependencies": {
-    "@eclipse-glsp/protocol": "next",
-    "vscode-jsonrpc": "^4.0.0"
+    "@eclipse-glsp/protocol": "ece"
   },
   "devDependencies": {
-    "@types/node": "^12.12.0",
-    "@types/vscode": "^1.54.0"
+    "@types/node": "14.x",
+    "@types/vscode": "^1.63.0"
   },
   "scripts": {
     "prepare": "yarn clean && yarn build && yarn lint",
@@ -52,6 +51,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/index",
-  "types": "lib/index"
+  "types": "lib/common/index",
+  "main": "lib/node/index",
+  "browser": {
+    "lib/node/index": "lib/browser/index"
+  }
 }

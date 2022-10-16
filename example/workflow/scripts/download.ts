@@ -18,17 +18,17 @@ import download from 'mvn-artifact-download';
 import { join } from 'path';
 
 const downloadDir = join(__dirname, '../extension/server');
-const mavenRepository = 'https://repo1.maven.org/maven2/';
+const mavenRepository = 'https://oss.sonatype.org/content/repositories/snapshots/';
 const groupId = 'org.eclipse.glsp.example';
 const artifactId = 'org.eclipse.glsp.example.workflow';
-const version = '1.0.0';
+const version = '1.1.0';
 const classifier = 'glsp';
 
 const serverExecutable = `${__dirname}/../extension/server/${artifactId}-${version}-${classifier}-SNAPSHOT.jar`;
 if (fs.existsSync(serverExecutable)) {
     fs.unlinkSync(serverExecutable);
 }
-const isSnapShot = false;
+const isSnapShot = true;
 console.log('Downloading latest version of the Workflow Example Java Server from the maven repository...');
 download({ groupId, artifactId, version, classifier, isSnapShot }, downloadDir, mavenRepository)
     .then(() =>

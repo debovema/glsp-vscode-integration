@@ -1,7 +1,8 @@
 // @ts-check
 const path = require('path');
 
-const outputPath = path.resolve(__dirname, '../extension/pack');
+const outputPath = path.resolve(__dirname, '../extension/dist/');
+var CircularDependencyPlugin = require('circular-dependency-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -9,10 +10,10 @@ const config = {
 
     entry: path.resolve(__dirname, 'src/index.ts'),
     output: {
-        filename: 'webview.js',
+        filename: 'workflow-glsp-webview.js',
         path: outputPath
     },
-    devtool: 'source-map-eval',
+    devtool: 'eval-source-map',
     mode: 'development',
 
     resolve: {
@@ -35,15 +36,22 @@ const config = {
                 use: ['style-loader', 'css-loader']
             },
             {
+                test: /\.ttf$/,
+                type: 'asset/resource'
+            },
+            {
                 test: /codicon.css$/,
                 use: ['ignore-loader']
             }
         ]
     },
-    node: { fs: 'empty', net: 'empty' },
-    stats: {
-        warningsFilter: [/Failed to parse source map/]
-    }
+    ignoreWarnings: [/Failed to parse source map/, /Can't resolve .* in '.*ws\/lib'/],
+    plugins: [
+        new CircularDependencyPlugin({
+            exclude: /(node_modules|examples)\/./,
+            failOnError: false
+        })
+    ]
 };
 
 module.exports = config;

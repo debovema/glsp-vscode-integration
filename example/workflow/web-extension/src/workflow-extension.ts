@@ -1,0 +1,75 @@
+/********************************************************************************
+ * Copyright (c) 2021-2022 EclipseSource and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * This Source Code may also be made available under the following Secondary
+ * Licenses when the conditions for such availability set forth in the Eclipse
+ * Public License v. 2.0 are satisfied: GNU General Public License, version 2
+ * with the GNU Classpath Exception which is available at
+ * https://www.gnu.org/software/classpath/license.html.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+ ********************************************************************************/
+import '@eclipse-glsp-examples/workflow-server/';
+import {
+    BrowserServerLauncher,
+    BrowserVscodeServer,
+    configureDefaultCommands,
+    GlspVscodeConnector,
+    NavigateAction
+} from '@eclipse-glsp/vscode-integration/browser';
+import 'reflect-metadata';
+import * as vscode from 'vscode';
+import WorkflowEditorProvider from './workflow-editor-provider';
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+    // Start server process using quickstart component
+    const serverLauncher = new BrowserServerLauncher();
+    context.subscriptions.push(serverLauncher);
+    const uri = vscode.Uri.joinPath(context.extensionUri, 'dist/workflow-server.js').toString(true);
+
+    const serverWorker = await serverLauncher.start({
+        serverScriptUrl: uri,
+        serverType: 'node'
+    });
+
+    // Wrap server with quickstart component
+    const workflowServer = new BrowserVscodeServer({
+        clientId: 'glsp.workflow',
+        serverWorker: serverWorker
+    });
+
+    // Initialize GLSP-VSCode connector with server wrapper
+    const glspVscodeConnector = new GlspVscodeConnector({
+        server: workflowServer,
+        logging: true
+    });
+
+    const customEditorProvider = vscode.window.registerCustomEditorProvider(
+        'workflow.glspDiagram',
+        new WorkflowEditorProvider(context, glspVscodeConnector),
+        {
+            webviewOptions: { retainContextWhenHidden: true },
+            supportsMultipleEditorsPerDocument: false
+        }
+    );
+
+    context.subscriptions.push(workflowServer, glspVscodeConnector, customEditorProvider);
+    workflowServer.start();
+
+    configureDefaultCommands({ extensionContext: context, connector: glspVscodeConnector, diagramPrefix: 'workflow' });
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('workflow.goToNextNode', () => {
+            glspVscodeConnector.sendActionToActiveClient(NavigateAction.create('next'));
+        }),
+        vscode.commands.registerCommand('workflow.goToPreviousNode', () => {
+            glspVscodeConnector.sendActionToActiveClient(NavigateAction.create('previous'));
+        }),
+        vscode.commands.registerCommand('workflow.showDocumentation', () => {
+            glspVscodeConnector.sendActionToActiveClient(NavigateAction.create('documentation'));
+        })
+    );
+}
